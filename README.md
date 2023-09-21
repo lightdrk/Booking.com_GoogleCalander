@@ -33,8 +33,8 @@ download the client secret file in folder helpers. rename it as client_secret.js
 Obtain OAuth2 tokens by running the project and following the authentication flow.
 
 Run the integration script:
-
-node GoogleCal.js
+```bash
+   node GoogleCal.js
 
 Enjoy automated calendar integration!
 
