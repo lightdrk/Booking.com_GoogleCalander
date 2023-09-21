@@ -1,5 +1,5 @@
 # Booking.com_GoogleCalander
-This script combined with booking.com_scraper (partner account ) creates google calendar events , reservation event,check-in and check-out with all the data like number, name, reservation id , property name etc.  
+This script combined with booking.com_scraper[https://github.com/lightdrk/booking.com_scraper.git] (partner account ) creates google calendar events , reservation event,check-in and check-out with all the data like number, name, reservation id , property name etc.  
 ## Overview
 
 The Booking.com Calendar Integration project allows you to synchronize booking data from Booking.com with Google Calendar, providing a seamless experience for managing reservations, check-ins, and check-outs.
