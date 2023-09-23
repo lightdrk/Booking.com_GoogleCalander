@@ -1,6 +1,9 @@
 const { google } = require('googleapis');
 const { OAuth2Client } = require('google-auth-library');
+const progress = require('cli-progress');
 const fs = require('fs');
+
+const bar = new progress.SingleBar({},progress.Presets.shades_classic);
 
 const prompt = require('prompt-sync')();
 
@@ -40,7 +43,6 @@ async function update(i,id,input,checkInId,checkOutId){
 }
 
 function remove(compare,i){
-  console.log('....................',compare["id"],compare["checkInId"]);
   calendar.events.delete(
     {
       calendarId: 'primary', 
@@ -78,7 +80,7 @@ async function eventsOf(summary,input,dateOn,colorId){
   dateOn = inputDate.toISOString();
   const event= {
       "summary":`${summary}{${input.propertyName}}{{${input.status}}}`,
-      "description":  `Name: ${input.name}\nPhone Number: ${input.number}\nReservation Number: ${input.reservationNumber}\n\npropertyId: ${input.propertyId}\n\nCheck-in: ${input.checkIn}\nCheck-out: ${input.checkOut}` ,
+      "description":  `Name: ${input.name}\nPhone Number: ${input.number}\nReservation Number: ${input.reservationNumber}\n\npropertyId: ${input.propertyId}\n\nCheck-in: ${input.checkIn}\nCheck-out: ${input.checkOut}\nTotal amount: ${input['totalPay']}\nNumber of Guest: ${input['Total Guest']}` ,
 
       "start":{
        "dateTime": dateOn ,
@@ -107,18 +109,27 @@ async function eventsOf(summary,input,dateOn,colorId){
 
 
 async function createCalendarEvent(data){
+  let length=0;  
+  for (let x in data){
+	length++;
+  }
+  bar.start(length,0);
+  let prog = 1;
   for (let i in data){
+    bar.update(prog);
+    prog++;
     var input = data[i];
     let id;
     let checkInId;
     let checkOutId;
     if (compare[i] && compare[i].status.toLowerCase() != input.status.toLowerCase()){
-        var tf= remove(compare,1);
-        if (tf){
+        var tf = remove(compare,i);
+	if (tf){
           console.log('updated...');
-          delete compare.i;
           id= await eventsOf('Reservation', input, date,'5');
-          fs.WriteFileSync('./calendar.json',JSON.Stringify(compare),'utf-8',()=>{console.log('updated..');});
+	  delete compare[i];
+	  console.log(compare);
+	  fs.writeFileSync('./calendar.json',JSON.stringify(compare),'utf-8',()=>{console.log('updated');}); 
         }
     }else if (!(compare[i])){
       id= await eventsOf('Reservation', input, date,'3'); 
@@ -130,7 +141,9 @@ async function createCalendarEvent(data){
       //Promise.all([id,checkInId,checkOutId])
       update(i,id,input,checkInId,checkOutId);
     }
-  }   
+  }
+  bar.update(data.length);
+  bar.stop();   
 }
 
 
@@ -173,3 +186,4 @@ async function getTokens(authCode) {
     }
   });
 }
+
