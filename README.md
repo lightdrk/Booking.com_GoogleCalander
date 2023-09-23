@@ -12,6 +12,7 @@ The Booking.com Calendar Integration project allows you to synchronize booking d
 - **Check-In and Check-Out**: Separate events for check-ins and check-outs make managing guest arrivals and departures straightforward.
 - **Conflict Resolution**: If a reservation status changes or conflicts with an existing event, the system updates or removes events accordingly.
 - **OAuth2 Authentication**: Secure OAuth2 authentication with Google Calendar API for data access.
+- **Progress-bar**: progress bar to track progress .
 
 ## Getting Started
 
