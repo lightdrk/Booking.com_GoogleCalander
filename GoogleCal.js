@@ -1,8 +1,13 @@
 const { google } = require('googleapis');
 const { OAuth2Client } = require('google-auth-library');
 const progress = require('cli-progress');
+const database = require('./database.js');
+const { creds } = require('./decrypt');
 const fs = require('fs');
 
+
+const details = creds();
+const db = new database(details);
 const bar = new progress.SingleBar({},progress.Presets.shades_classic);
 
 const prompt = require('prompt-sync')();
@@ -18,8 +23,8 @@ const year = date.getFullYear().toString();
 
 // Combine the components into the desired format
 const formattedDate = `${month}${day}${year}`;
-const fileName = `/Users/t3369nx/Desktop/newtest/booking.com/${formattedDate}-guest.json` 
-const data = require(fileName);
+await db.connect();
+const data = db.retriveData(formattedDate);
 
 const credentials = require('./helpers/client_secret.json');
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
