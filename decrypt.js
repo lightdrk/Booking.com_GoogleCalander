@@ -21,11 +21,11 @@ function creds(){
 	udecipher += decipheru.final("utf8");
 	var pdecipher = decipherp.update(password,'hex','utf8');
 	pdecipher += decipherp.final("utf8");
-	console.log(hdecipher);
+	//console.log(hdecipher);
 
-	console.log(udecipher);
+	//console.log(udecipher);
 
-	console.log(pdecipher);
+	//console.log(pdecipher);
 
 
 	return { 'host': hdecipher, 'user':  udecipher, 'password': pdecipher }

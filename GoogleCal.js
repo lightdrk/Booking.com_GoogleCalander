@@ -1,7 +1,7 @@
 const { google } = require('googleapis');
 const { OAuth2Client } = require('google-auth-library');
 const progress = require('cli-progress');
-const database = require('./database.js');
+const database = require('./database');
 const { creds } = require('./decrypt');
 const fs = require('fs');
 
@@ -23,8 +23,15 @@ const year = date.getFullYear().toString();
 
 // Combine the components into the desired format
 const formattedDate = `${month}${day}${year}`;
-await db.connect();
-const data = db.retriveData(formattedDate);
+let data = {};
+
+async function dataEx(){
+  await db.connect();
+  data = await db.retriveData(formattedDate);
+  await db.disconnect();
+}
+
+
 
 const credentials = require('./helpers/client_secret.json');
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
@@ -43,7 +50,7 @@ try {
   compare={};
 }
 async function update(i,id,input,checkInId,checkOutId){
-  compare[i]= {'status':input['status'], 'id':id,'checkInId':checkInId, 'checkOutId': checkOutId };
+  compare[i]= {'status':input['STATUS'], 'id':id,'checkInId':checkInId, 'checkOutId': checkOutId };
   fs.writeFileSync('calendar.json',JSON.stringify(compare),'utf-8',()=>{console.log('written...')});
 }
 
@@ -84,8 +91,8 @@ async function eventsOf(summary,input,dateOn,colorId){
   let inputDate = new Date(dateOn);
   dateOn = inputDate.toISOString();
   const event= {
-      "summary":`${summary}{${input.propertyName}}{{${input.status}}}`,
-      "description":  `Name: ${input.name}\nPhone Number: ${input.number}\nReservation Number: ${input.reservationNumber}\n\npropertyId: ${input.propertyId}\n\nCheck-in: ${input.checkIn}\nCheck-out: ${input.checkOut}\nTotal amount: ${input['totalPay']}\nNumber of Guest: ${input['Total Guest']}` ,
+      "summary":`${summary}{${input.PROPERTY_NAME}}{{${input.STATUS}}}`,
+      "description":  `Name: ${input.ALIAS}\nPhone Number: ${input.NUMBER}\nReservation Number: ${input.RESERVATION_NUMBER}\n\npropertyId: ${input.PROPERTY_ID}\n\nCheck-in: ${input.CHECK_IN}\nCheck-out: ${input.CHECK_OUT}\nTotal amount: ${input['AMOUNT_PAID']}\nNumber of Guest: ${input['GUEST_DETAILS']}` ,
 
       "start":{
        "dateTime": dateOn ,
@@ -127,7 +134,8 @@ async function createCalendarEvent(data){
     let id;
     let checkInId;
     let checkOutId;
-    if (compare[i] && compare[i].status.toLowerCase() != input.status.toLowerCase()){
+    
+    if (compare[i] && compare[i].status.toLowerCase() != input.STATUS.toLowerCase()){
         var tf = remove(compare,i);
 	if (tf){
           console.log('updated...');
@@ -140,9 +148,9 @@ async function createCalendarEvent(data){
       id= await eventsOf('Reservation', input, date,'3'); 
     }
        
-    if (input.status.toLowerCase() == 'ok') {
-      checkInId = await  eventsOf('Check-In',input,input.checkIn,'2');
-      checkOutId =  await eventsOf('Check-out',input,input.checkOut,'4');
+    if (input.STATUS.toLowerCase() == 'ok') {
+      checkInId = await  eventsOf('Check-In',input,input.CHECK_IN,'2');
+      checkOutId =  await eventsOf('Check-out',input,input.CHECK_OUT,'4');
       //Promise.all([id,checkInId,checkOutId])
       update(i,id,input,checkInId,checkOutId);
     }
@@ -153,7 +161,7 @@ async function createCalendarEvent(data){
 
 
 // Load or refresh your access token (you can use a token.json file to store it)
-fs.readFile('./helpers/token.json', (err, token) => {
+fs.readFile('./helpers/token.json', async(err, token) => {
   if (err) {
     getAccessToken();
 
@@ -164,6 +172,8 @@ fs.readFile('./helpers/token.json', (err, token) => {
 
     getTokens(code);
   } else {
+
+    await dataEx();
     client.setCredentials(JSON.parse(token));
     createCalendarEvent(data);
   }

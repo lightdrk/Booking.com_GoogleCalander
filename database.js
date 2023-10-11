@@ -10,7 +10,6 @@ class database{
 
 	async connect(){
 		try{
-			console.log('test: ',this.config.host);
 			this.connection = await mysql.createConnection({
 				host: this.config.host,
 				user: this.config.user,
@@ -53,12 +52,6 @@ class database{
 		}
 		return store;
 	}
-
-	async drop(previous){
-		await this.connection.query(`DROP TABLE temp${previous}`);
-		console.log('deleted');
-	}
-
 }
 
 module.exports = database;
